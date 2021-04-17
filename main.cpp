@@ -77,6 +77,6 @@ int main() {
     // 5. create a std::unique_ptr to a color on the free-store and call it 'colorPtr', pass this color to the
     // 'colorSink' function.
     // Uncomment the below two lines, and replace the ... with code
-    //std::unique_ptr<Color> colorPtr = std::make_unique<Color>();
-    //colorSink(colorPtr);
+    std::unique_ptr<Color> colorPtr = std::make_unique<Color>();
+    colorSink(move(colorPtr));
 }
