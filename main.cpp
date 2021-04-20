@@ -40,15 +40,15 @@ int main() {
     }
 
     std::cout << "COLORS: [\n";
-    for (int i = 0; i < colors.size(); ++i) {
-        std::cout << colors[i] << "\n";
+    for (auto& item : colors) {
+        std::cout << item << "\n";
     }
     std::cout << "]\n";
 
     std::cout << "REVERSED COLORS: [\n";
     std::reverse(colors.begin(), colors.end());
-    for (int i = 0; i < colors.size(); ++i) {
-        std::cout << colors[i] << "\n";
+    for (auto& item : colors) {
+        std::cout << item << "\n";
     }
     std::cout << "]\n";
 
@@ -72,8 +72,8 @@ int main() {
     auto comp = [](const Color& c1, const Color& c2) { return (c1.blue < c2.blue); };
     std::sort(colors.begin(), colors.end(), comp);
     std::cout << "COLORS SORTED BY BLUE: [ \n";
-    for (int i = 0; i < colors.size(); ++i) {
-        std::cout << colors[i] << "\n";
+    for (auto& item : colors) {
+        std::cout << item << "\n";
     }
     std::cout << "]\n";
 
