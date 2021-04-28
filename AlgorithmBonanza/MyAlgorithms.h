@@ -79,19 +79,77 @@ namespace my {
         return std::make_pair(*min, *max);
     }
 
-    /*template<typename Iter, typename T>
-    Iter lower_bound(Iter left, Iter right, const T& value) { ... }
+    template<typename Iter, typename T>
+    Iter lower_bound(Iter left, Iter right, const T& value) {
+        while (left < right) {
+            auto mid = std::advance(left, std::distance(left, right) / 2);
+            if (*mid == value) {
+                return mid;
+            }
+            else if (*mid > value) {
+                left = std::next(mid);
+            }
+            else {
+                right = mid;
+            }
+        }
+        return right;
+    }
 
     template<typename Iter, typename T>
-    Iter binary_search(Iter left, Iter right, const T& value) { ... }
+    Iter binary_search(Iter left, Iter right, const T& value) {
+        auto it = my::lower_bound(left, right, value);
+        if (*it != right && *it == value) { return it; }
+        else { return right; }
+    }
 
+    template<typename Iter>
+    int count(Iter first, Iter second) {
+        int count = 0;
+        for (; first < second; first++) {
+            count++;
+        }
+        return count;
+    }
+
+    template<typename Iter, typename UnaryPredicate>
+    int count_if(Iter first, Iter second, UnaryPredicate func) {
+        int count = 0;
+        for (; first < second; first++) {
+            if (func(*first)) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
     template<typename InputIter, typename OutputIter>
     void merge(InputIter lefta, InputIter righta,
         InputIter leftb, InputIter rightb,
         OutputIter target) {
-        ...
+        for (; lefta != righta; ++target) {
+            if (leftb == rightb || *lefta < *leftb) {
+                *target = *lefta;
+                ++lefta;
+            }
+            else {
+                *target = *leftb;
+                ++leftb;
+            }
+        }
     }
 
-    template<typename Iter, typename T>
+   template<typename Iter>
+   bool is_sorted(Iter first, Iter last) {
+        if (first == last) { return true; }
+        Iter next = first;
+        while (++next != last) {
+            if (*next < *first)
+                return false;
+            ++first;
+        }
+        return true;
+    }
+    /*template<typename Iter, typename T>
     void partition(Iter left, Iter right, const T& value) { ... }*/
 }

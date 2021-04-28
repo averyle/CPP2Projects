@@ -5,9 +5,8 @@
 #include "Util.h"
 
 int main() {
-	auto test = generate_integers<30>();
-	auto testResult = my::minmax_element(std::cbegin(test), std::cend(test));
-	std::cout << test << "\n";
+	auto test = generate_integers<10>();
+	/*auto testResult = my::minmax_element(std::cbegin(test), std::cend(test));
 	std::cout << "the minmax pair is " << testResult << "\n";
 	std::mt19937 gen{ std::random_device{}() };
 	std::uniform_int_distribution<int> range{ 0, 100 };
@@ -22,7 +21,24 @@ int main() {
 	}
 	if (max != std::cend(data)) {
 		std::cout << "the maximum element is " << *max << "\n";
+	}*/
+	std::cout << "Test vector: " << test << "\n";
+	int countEven = my::count_if(std::cbegin(test), std::cend(test), [](const int& val) { return ((val % 2) == 0); });
+	std::cout << "Total even elements: " << countEven << "\n";
+	std::cout << test << ": ";;
+	if (my::is_sorted(std::begin(test), std::end(test)) == 0) {
+		std::cout << "false\n";
 	}
+	else { std::cout << "true\n"; }
+	std::sort(std::begin(test), std::end(test));
+	std::cout << test << ": ";;
+	if (my::is_sorted(std::begin(test), std::end(test)) == 0) {
+		std::cout << "false";
+	}
+	else { std::cout << "true"; }
+	
+
+
 
 
 }
