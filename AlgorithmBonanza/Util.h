@@ -18,7 +18,7 @@ std::vector<T> generate_data(Generator nextElement) {
 template<size_t Count>
 std::vector<int> generate_integers() {
 	std::mt19937 gen{ std::random_device{}() };
-	std::uniform_int_distribution<int> range{ 0, 100 };
+	std::uniform_int_distribution<int> range{ 0, 20 };
 
 	auto result = generate_data<Count, int>([&gen, &range]() {
 		return range(gen);

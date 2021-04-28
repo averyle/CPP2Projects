@@ -5,7 +5,18 @@
 #include "Util.h"
 
 int main() {
-	auto test = generate_integers<10>();
+	auto testa = generate_integers<10>();
+	auto testb = generate_integers<5>();
+	std::cout << testa << "\n" << testb << "\n";
+	auto result = std::find_first_of(testa.begin(), testa.end(), testb.begin(), testb.end());
+
+	if (result == testa.end()) {
+		std::cout << "no matching elements\n";
+	}
+	else {
+		std::cout << "found a match at "
+			<< std::distance(testa.begin(), result) << "\n";
+	}
 	/*auto testResult = my::minmax_element(std::cbegin(test), std::cend(test));
 	std::cout << "the minmax pair is " << testResult << "\n";
 	std::mt19937 gen{ std::random_device{}() };
@@ -21,7 +32,7 @@ int main() {
 	}
 	if (max != std::cend(data)) {
 		std::cout << "the maximum element is " << *max << "\n";
-	}*/
+	}
 	std::cout << "Test vector: " << test << "\n";
 	int countEven = my::count_if(std::cbegin(test), std::cend(test), [](const int& val) { return ((val % 2) == 0); });
 	std::cout << "Total even elements: " << countEven << "\n";
@@ -36,6 +47,8 @@ int main() {
 		std::cout << "false";
 	}
 	else { std::cout << "true"; }
+	*/
+
 	
 
 

@@ -150,6 +150,42 @@ namespace my {
         }
         return true;
     }
-    /*template<typename Iter, typename T>
-    void partition(Iter left, Iter right, const T& value) { ... }*/
+    
+   template<typename Iter, typename T>
+    void partition(Iter left, Iter right, const T& value) {
+        while (left != right && *left < value) {
+            ++left;
+        }
+        if (left == right) return;
+
+        for (Iter swapFrom = std::next(left); swapFrom != right; ++swapFrom) {
+            if (*swapFrom < value) {
+                auto *temp = left;
+                *left = *swapFrom;
+                *swapFrom = *temp;
+                ++left;
+            }
+        }
+
+        for (Iter pivotIter = std::next(left); pivotIter != right; ++pivotIter) {
+            auto *temp = left;
+            *left = *pivotIter;
+            *pivotIter = *temp;
+            break;
+        }
+    }
+
+    template<typename InputIter, class Iter>
+    InputIter find_first_of(InputIter first, InputIter last,
+        Iter s_first, Iter s_last)
+    {
+        for (; first != last; ++first) {
+            for (Iter it = s_first; it != s_last; ++it) {
+                if (*first == *it) {
+                    return first;
+                }
+            }
+        }
+        return last;
+    }
 }
