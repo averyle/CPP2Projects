@@ -3,11 +3,11 @@
 #include <random>
 #include <vector>
 
-template<size_t Count = 20, typename T, typename Generator>
-std::vector<T> generate_data(Generator nextElement) {
+template< typename T, typename Generator>
+std::vector<T> generate_data(size_t count, Generator nextElement) {
 	std::vector<T> result;
 
-	for (size_t i = 1; i < Count; i++) {
+	for (size_t i = 0; i < count; i++) {
 		result.push_back(nextElement());
 	}
 
@@ -15,12 +15,12 @@ std::vector<T> generate_data(Generator nextElement) {
 
 }
 
-template<size_t Count>
-std::vector<int> generate_integers() {
+template<typename T>
+std::vector<T> generate_integers(size_t count) {
 	std::mt19937 gen{ std::random_device{}() };
-	std::uniform_int_distribution<int> range{ 0, 20 };
+	std::uniform_int_distribution range{ 0, 20000 };
 
-	auto result = generate_data<Count, int>([&gen, &range]() {
+	auto result = generate_data<T>(count, [&gen, &range]() {
 		return range(gen);
 		});
 
