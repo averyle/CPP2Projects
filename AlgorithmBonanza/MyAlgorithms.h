@@ -103,6 +103,24 @@ namespace my {
         else { return right; }
     }
 
+    template<typename Iter, typename T, typename binaryPredicate>
+    Iter binary_search(Iter left, Iter right, const T& value, binaryPredicate func) {
+        Iter mid;
+        while (left <= right - 1) {
+            mid = left + (right - left - 1) / 2;
+            if (*mid == value) {
+                return mid;
+            }
+            if (func(*mid, value)) {
+                left = mid + 1;
+            }
+            else {
+                right = mid - 1;
+            }
+        }
+        return right;
+    }
+
     template<typename Iter>
     int count(Iter first, Iter second) {
         int count = 0;
@@ -175,17 +193,4 @@ namespace my {
         }
     }
 
-    template<typename InputIter, class Iter>
-    InputIter find_first_of(InputIter first, InputIter last,
-        Iter s_first, Iter s_last)
-    {
-        for (; first != last; ++first) {
-            for (Iter it = s_first; it != s_last; ++it) {
-                if (*first == *it) {
-                    return first;
-                }
-            }
-        }
-        return last;
-    }
 }
