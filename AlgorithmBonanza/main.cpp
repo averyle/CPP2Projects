@@ -5,116 +5,57 @@
 #include <chrono>
 #include "MyAlgorithms.h"
 #include "Util.h"
+#include "Sort.h"
 #include <numeric>
 
-int main() {
-	/*auto runtimeMeasure = [](auto& func, auto&...param) {
-		auto tick = std::chrono::steady_clock::now();
-		std::forward<decltype(func)>(func)(std::forward<decltype(param)>(param)...);
-		auto tock = std::chrono::steady_clock::now();
-		std::chrono::duration<double> seconds = tock - tick;
-		return seconds;
-	};*/
+auto runtime = [](auto&& func, auto&&...param) {
+	auto tick = std::chrono::steady_clock::now();
+	std::forward<decltype(func)>(func)(std::forward<decltype(param)>(param)...);
+	auto tock = std::chrono::steady_clock::now();
+	std::chrono::duration<double> seconds = tock - tick;
+	return seconds.count();
+};
 
-	std::string runtime = "runtime.csv";
-	std::string comparison = "comparison.csv";
-	std::ofstream runtimeFout{ runtime, std::ios::out };
-	std::ofstream comparisonFout{ comparison, std::ios::out };
-	std::vector<double> measurements;
-	int count = 0;
-	for (int n = 10000; n <= 1000000; n += 10000) {
+int main() {
+
+	std::string results = "results.csv";
+	std::ofstream Fout{ results, std::ios::out };
+	Fout << "n, sort_time, sort_comp, sort_swap, sel_time, sel_comp, sel_swap, ins_time, ins_comp, ins_sawp, mg_time, mg_comp, mg_swap, qck_time, qck_comp, qck_swap, bub_time, bub_comp, bub_swap\n";
+	for (int n = 1000; n <= 10000; n += 500) {
 		std::mt19937 gen{ std::random_device{}() };
-		std::uniform_int_distribution<int> range{ 0, 2*n };
-		auto data = generate_data<int>(n,[&gen, &range]() {
+		std::uniform_int_distribution<int> range{ 0, 2 * n };
+		auto data = generate_data<int>(n, [&gen, &range]() {
 			return range(gen);
 			});
+		
+		Fout << n << ", ";
 
-		auto val = range(gen);
-		auto func1 = [&val, &count](const int& item) { count++;  return item == val; };
-		auto func2 = [&val, &count](const int& i, const int& j) { count++;  return (i < j); };
-		auto func3 = [&count](const int& i) { count++; return (i % 2 == 0); };
+		my::sortAnalytics analytics;
+		std::vector<int> sort1 = clone(data);
+		Fout << runtime(std::sort<decltype(sort1.begin())>, sort1.begin(), sort1.end())
+			<< ", " << analytics << ", " ;
+	
+		std::vector<int> sort2 = clone(data);
+		Fout << runtime(my::selection_sort<decltype(sort2.begin())>, sort2.begin(), sort2.end(), analytics)
+			<< ", " << analytics << ", ";
+		reset(analytics);
 
-		for (int i = 0; i < 3; i++) {
-			auto tick = std::chrono::steady_clock::now();
-			auto it = std::find_if(std::cbegin(data), std::cend(data), func1);
-			auto tock = std::chrono::steady_clock::now();
-			std::chrono::duration<double> seconds = tock - tick;
-			measurements.push_back(seconds.count());
-		}
-		auto average1 = std::accumulate(std::cbegin(measurements), std::cend(measurements), 0.0) / std::size(measurements);
-		runtimeFout << n << "," << average1 << ",";
-		comparisonFout << n << "," << count << ",";
-		measurements.clear();
-		count = 0;
+		std::vector<int> sort3 = clone(data);
+		Fout << runtime(my::insertion_sort<decltype(sort3.begin())>, sort3.begin(), sort3.end(), analytics)
+			<< ", " << analytics << ", ";
+		reset(analytics);
 
-		for (int i = 0; i < 3; i++) {
-			auto tick = std::chrono::steady_clock::now();
-			auto it = my::find_if(std::cbegin(data), std::cend(data), func1);
-			auto tock = std::chrono::steady_clock::now();
-			std::chrono::duration<double> seconds = tock - tick;
-			measurements.push_back(seconds.count());
-		}
-		auto average2 = std::accumulate(std::cbegin(measurements), std::cend(measurements), 0.0) / std::size(measurements);
-		runtimeFout << average2 << ",";
-		comparisonFout << count << ",";
-		measurements.clear();
-		count = 0;
+		std::vector<int> sort4 = clone(data);
+		Fout << runtime(my::merge_sort<decltype(sort4.begin())>, sort4.begin(), sort4.end(), analytics)
+			<< ", " << analytics << ", ";
+		reset(analytics);
 
-		for (int i = 0; i < 3; i++) {
-			std::vector<int> clone;
-			std::copy(std::begin(data), std::end(data), std::back_inserter(clone));
-			std::sort(clone.begin(), clone.end());
-			auto tick = std::chrono::steady_clock::now();
-			auto it = std::binary_search(std::cbegin(clone), std::cend(clone), val, func2);
-			auto tock = std::chrono::steady_clock::now();
-			std::chrono::duration<double> seconds = tock - tick;
-			measurements.push_back(seconds.count());
-		}
-		auto average3 = std::accumulate(std::cbegin(measurements), std::cend(measurements), 0.0) / std::size(measurements);
-		runtimeFout << average3 << ",";
-		comparisonFout << count << ",";
-		measurements.clear();
-		count = 0;
+		std::vector<int> sort5 = clone(data);
+		Fout << runtime(my::quick_sort<decltype(sort5.begin())>, sort5.begin(), sort5.end(), analytics)
+			<< ", " << analytics << ", ";
 
-		for (int i = 0; i < 3; i++) {
-			std::vector<int> clone;
-			std::copy(std::begin(data), std::end(data), std::back_inserter(clone));
-			std::sort(clone.begin(), clone.end());
-			auto tick = std::chrono::steady_clock::now();
-			auto it = my::binary_search(std::cbegin(clone), std::cend(clone), val, func2);
-			auto tock = std::chrono::steady_clock::now();
-			std::chrono::duration<double> seconds = tock - tick;
-			measurements.push_back(seconds.count());
-		}
-		auto average4 = std::accumulate(std::cbegin(measurements), std::cend(measurements), 0.0) / std::size(measurements);
-		runtimeFout << average4 << ",";
-		comparisonFout << count << ",";
-		measurements.clear();
-
-		for (int i = 0; i < 3; i++) {
-			auto tick = std::chrono::steady_clock::now();
-			auto it = std::count_if(std::cbegin(data), std::cend(data), func3);
-			auto tock = std::chrono::steady_clock::now();
-			std::chrono::duration<double> seconds = tock - tick;
-			measurements.push_back(seconds.count());
-		}
-		auto average5 = std::accumulate(std::cbegin(measurements), std::cend(measurements), 0.0) / std::size(measurements);
-		runtimeFout << average5 << ",";
-		comparisonFout << count << ",";
-		measurements.clear(); 
-		count = 0;
-
-		for (int i = 0; i < 3; i++) {
-			auto tick = std::chrono::steady_clock::now();
-			auto it = my::count_if(std::cbegin(data), std::cend(data), func3);
-			auto tock = std::chrono::steady_clock::now();
-			std::chrono::duration<double> seconds = tock - tick;
-			measurements.push_back(seconds.count());
-		}
-		auto average6 = std::accumulate(std::cbegin(measurements), std::cend(measurements), 0.0) / std::size(measurements);
-		runtimeFout << average6 << "\n";
-		comparisonFout << count << "\n";
-		measurements.clear();
-		count = 0;
+		std::vector<int> sort6 = clone(data);
+		Fout << runtime(my::bubble_sort<decltype(sort6.begin())>, sort6.begin(), sort6.end(), analytics)
+			<< ", " << analytics << "\n";
 	}
 }
