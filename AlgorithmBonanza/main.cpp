@@ -2,11 +2,11 @@
 #include <fstream>
 #include <algorithm>
 #include <string>
-#include <chrono>
-#include "MyAlgorithms.h"
-#include "Util.h"
-#include "Sort.h"
+#include <random>
 #include <numeric>
+#include <chrono>
+#include "containers.h"
+
 
 auto runtime = [](auto&& func, auto&&...param) {
 	auto tick = std::chrono::steady_clock::now();
@@ -16,46 +16,77 @@ auto runtime = [](auto&& func, auto&&...param) {
 	return seconds.count();
 };
 
+auto pushIt = [](auto&& list, int size, int random) {
+	for (int i = 0; i < size; ++i)
+	{
+		list.push(random);
+	}
+};
+
+auto popIt = [](auto&& list, int size) {
+	for (int i = 0; i < size; ++i)
+	{
+		list.pop();
+	}
+};
+
+template<typename T>
+std::ostream& operator<<(std::ostream& out, std::vector<T>& data) {
+	out << "[";
+	for (const T& item : data) {
+		out << item << ",";
+	}
+	out << "]";
+	return out;
+}
+
 int main() {
-
-	std::string results = "results.csv";
+	std::string results = "push_pop.csv";
 	std::ofstream Fout{ results, std::ios::out };
-	Fout << "n, sort_time, sort_comp, sort_swap, sel_time, sel_comp, sel_swap, ins_time, ins_comp, ins_sawp, mg_time, mg_comp, mg_swap, qck_time, qck_comp, qck_swap, bub_time, bub_comp, bub_swap\n";
-	for (int n = 1000; n <= 10000; n += 500) {
+
+	my::array_queue<int> array_queue;
+	my::ring_queue<int> ring_queue;
+	my::linked_queue<int> linked_queue;
+	my::array_stack<int> array_stack;
+	my::linked_stack<int> linked_stack;
+
+	Fout << "n, aq push, aq pop, rq push, rq pop, lq push, lq pop, as push, as pop, ls push, ls pop \n";
+	for (int i = 10000; i <= 100000; i += 5000) {
+
 		std::mt19937 gen{ std::random_device{}() };
-		std::uniform_int_distribution<int> range{ 0, 2 * n };
-		auto data = generate_data<int>(n, [&gen, &range]() {
-			return range(gen);
-			});
-		
-		Fout << n << ", ";
+		std::uniform_int_distribution<int> range{ 0, 10000 };
+		auto random = range(gen);
 
-		my::sortAnalytics analytics;
-		std::vector<int> sort1 = clone(data);
-		Fout << runtime(std::sort<decltype(sort1.begin())>, sort1.begin(), sort1.end())
-			<< ", " << analytics << ", " ;
-	
-		std::vector<int> sort2 = clone(data);
-		Fout << runtime(my::selection_sort<decltype(sort2.begin())>, sort2.begin(), sort2.end(), analytics)
-			<< ", " << analytics << ", ";
-		reset(analytics);
+		Fout << i << ",";
 
-		std::vector<int> sort3 = clone(data);
-		Fout << runtime(my::insertion_sort<decltype(sort3.begin())>, sort3.begin(), sort3.end(), analytics)
-			<< ", " << analytics << ", ";
-		reset(analytics);
+		Fout << runtime(pushIt, array_queue, i, random)
+			<< ","
+			<< runtime(popIt, array_queue, i)
+			<< ",";
+		array_queue.clear();
 
-		std::vector<int> sort4 = clone(data);
-		Fout << runtime(my::merge_sort<decltype(sort4.begin())>, sort4.begin(), sort4.end(), analytics)
-			<< ", " << analytics << ", ";
-		reset(analytics);
+		Fout << runtime(pushIt, ring_queue, i, random)
+			<< ","
+			<< runtime(popIt, ring_queue, i)
+			<< ",";
+		ring_queue.clear();
+			
+		Fout << runtime(pushIt, linked_queue, i, random)
+			<< ","
+			<< runtime(popIt, linked_queue, i)
+			<< ",";
+		linked_queue.clear();
 
-		std::vector<int> sort5 = clone(data);
-		Fout << runtime(my::quick_sort<decltype(sort5.begin())>, sort5.begin(), sort5.end(), analytics)
-			<< ", " << analytics << ", ";
+		Fout << runtime(pushIt, array_stack, i, random)
+			<< ","
+			<< runtime(popIt, array_stack, i)
+			<< ",";
+		array_stack.clear();
 
-		std::vector<int> sort6 = clone(data);
-		Fout << runtime(my::bubble_sort<decltype(sort6.begin())>, sort6.begin(), sort6.end(), analytics)
-			<< ", " << analytics << "\n";
+		Fout << runtime(pushIt, linked_stack, i, random)
+			<< ","
+			<< runtime(popIt, linked_stack, i)
+			<< "\n";
+		linked_stack.clear();
 	}
 }
