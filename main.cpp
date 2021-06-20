@@ -1,33 +1,67 @@
-//#include <string>
+#include <string>
+#include <fstream>
 #include <iostream>
 #include <algorithm>
 #include <random>
+#include <chrono>
+
 #include "associative.h"
 #include "contact.hpp"
 
-using namespace std::string_literals;
+auto runtime = [](auto&& func, auto&&...param) {
+    auto tick = std::chrono::steady_clock::now();
+    std::forward<decltype(func)>(func)(std::forward<decltype(param)>(param)...);
+    auto tock = std::chrono::steady_clock::now();
+    std::chrono::duration<double> seconds = tock - tick;
+    return seconds.count();
+};
 
-constexpr std::size_t Capacity = 16;
+auto insertFunc = [](auto&& table, int size, int random) {
+    for (int i = 0; i < size; ++i)
+    {
+        table.insert(random);
+    }
+};
+
+auto eraseFunc = [](auto&& table, int size,auto& it) {
+    for (int i = 0; i < size; ++i)
+    {
+        table.erase(it);
+    }
+};
+
+auto findFunc = [](auto&& table, int size, int value) {
+    for (int i = 0; i < size; ++i)
+    {
+        table.find(value);
+    }
+};
 
 int main() {
-    my::lookup_table<int, 64> hotel_room_occupancy;
+    std::string results = "results.csv";
+    std::ofstream Fout{ results , std::ios::out };
+    my::chaining_hash_table<int> chaining_table;
+    my::probing_hash_table<int> probing_table;
 
-    std::mt19937 rng{ std::random_device{}() };
-    std::uniform_int_distribution<size_t> room_range{ 0,63 };
+    Fout << "n, chaining insert, chaining remove, chaining find, probing insert, probing remove, probing find\n";
+    for (int i = 100; i <= 1000; i += 50) {
+        std::mt19937 gen{ std::random_device{}() };
+        std::uniform_int_distribution<int> range{ 0, 10000 };
+        auto random = range(gen);
 
-    for (int i = 0; i < 30; ++i) {
-        auto room = room_range(rng);
-        std::cout << "guest" << i << " has arrived and wants to stay in room" << room << "\n";
+        Fout << i << ",";
 
-        auto occupied = hotel_room_occupancy.lookup(room);
-        std::cout << "\tthe room is " << (occupied.has_value() ? "occupied" : "vacant") << "\n";
+        Fout << runtime(insertFunc, chaining_table, i, random) << ",";
+        auto it = chaining_table.begin();
+        Fout << runtime(eraseFunc, chaining_table, i, it) << ","
+             << runtime(findFunc, chaining_table, i, random) << ",";
+        chaining_table.clear();
 
-        if (occupied.has_value()) {
-            std::cout << "\tsorry guest, " << occupied.value() << " is already here :(\n\n";
-        }
-        else {
-            hotel_room_occupancy.set(room, i);
-            std::cout << "\tWelcome to the hotel :)\n\n";
-        }
+        Fout << runtime(insertFunc, probing_table, i, random) << ",";
+        auto it2 = probing_table.begin();
+        Fout << runtime(eraseFunc, probing_table, i, it2) << ","
+             << runtime(findFunc, probing_table, i, random) << "\n";
+        probing_table.clear();
     }
+
 }
